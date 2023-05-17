@@ -59,48 +59,12 @@ settings:
 
 ```
 
-```JSON
-{
-    "display_information": {
-        "name": "LIGO-Alert-Bot"
-    },
-    "features": {
-        "bot_user": {
-            "display_name": "LIGO-Alert-Bot",
-            "always_online": false
-        }
-    },
-    "oauth_config": {
-        "scopes": {
-            "bot": [
-                "calls:read",
-                "channels:join",
-                "channels:manage",
-                "chat:write",
-                "chat:write.customize",
-                "commands",
-                "files:write",
-                "groups:write",
-                "im:write",
-                "mpim:write",
-                "channels:read",
-                "groups:read"
-            ]
-        }
-    },
-    "settings": {
-        "org_deploy_enabled": false,
-        "socket_mode_enabled": false,
-        "token_rotation_enabled": false
-    }
-}
-```
-
 ### 1.3 Configure Python 
 
 * Create a file named `slack_token.py`. Within this file, store the `Bot User OAuth Token` in a variable called `SLACK_TOKEN`. This token will allow you to interface between python and slack.
 * Use the `env.txt` file to recreate the python environment using conda. This can be done using `conda env create --file env.txt`.
-* Activate the newly created conda environment and run `python bot_updated.py` and you should seeing the alerts as they come in. 
+* Activate the newly created conda environment and run `python bot_updated.py` and you should seeing the alerts as they come in.
+* Note: In order for the alerts to post to slack you need the main channel to already exist and need to have actively added the slackbot app to that channel. 
 * Note: The original `bot.py` developed by Ved and Gautham (see acknowledgements) is available through the SCIMMA repo and this fork was edited to add additional capabilities. This file was renamed to `bot_original.py' for record keeping purposes.
 
 ## Workflow of the Bot
