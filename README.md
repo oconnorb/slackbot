@@ -26,7 +26,7 @@ And https://github.com/scimma/hop-client/wiki/Tutorial:-using-hop-client-with-th
 * Create the app.
 * Navigate to `Features` > `OAuth & Permissions` and scroll down to `OAuth Tokens for Your Workspace`. From here, you can install the app to your workspace. Once you have read through the data permissions, click allow.
 * You will now see a `Bot User OAuth Token`. This is what you can use within python to access the slack api. 
-* Note: I found that you need `pip3 install slack-sdk` in order for the `import slack' command to work as `pip3 install slackclient` is apparently deprecated…
+* Note: I found that you need `pip3 install slack-sdk` in order for the `import slack` command to work as `pip3 install slackclient` is apparently deprecated…
 
 
 #### App manifests:
