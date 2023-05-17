@@ -103,6 +103,16 @@ settings:
 * Activate the newly created conda environment and run `python bot_updated.py` and you should seeing the alerts as they come in. 
 * Note: The original `bot.py` developed by Ved and Gautham (see acknowledgements) is available through the SCIMMA repo and this fork was edited to add additional capabilities. This file was renamed to `bot_original.py' for record keeping purposes.
 
+## Workflow of the Bot
+
+*TBD*
+
+1. ...
+2. ...
+3. ...
+
+*TBD*
+
 ## Known Issues:
 
 * The current alerts are not real. Thus, there is a fair bit of repetition which causes some of the channel-creation and archiving features to fail. We expect this issue to resolve itself when the engineering run begins. The current alerts are also all BNS mergers and this will change once the science run begins.
