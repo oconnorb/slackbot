@@ -65,7 +65,7 @@ settings:
 * Use the `env.txt` file to recreate the python environment using conda. This can be done using `conda env create --file env.txt`.
 * Activate the newly created conda environment and run `python bot_updated.py` and you should seeing the alerts as they come in.
 * Note: In order for the alerts to post to slack you need the main channel to already exist and need to have actively added the slackbot app to that channel. 
-* Note: The original `bot.py` developed by Ved and Gautham (see acknowledgements) is available through the SCIMMA repo and this fork was edited to add additional capabilities. This file was renamed to `bot_original.py' for record keeping purposes.
+* Note: The original `bot.py` developed by Ved and Gautham (see acknowledgements) is available through the SCIMMA repo and this fork was edited to add additional capabilities. This file was renamed to `bot_original.py` for record keeping purposes.
 
 ## Workflow of the Bot
 
@@ -81,7 +81,7 @@ settings:
 
 * The current alerts are not real. Thus, there is a fair bit of repetition which causes some of the channel-creation and archiving features to fail. We expect this issue to resolve itself when the engineering run begins. The current alerts are also all BNS mergers and this will change once the science run begins.
 
-* Archiving channels after a retraction is very slow right now and will get slower as the number of channels in a workspace increases (due to linear search). Slack does not currently have api's (that I could find) that can do this efficiently (O(1)) so we might have to build something on our own. Once again, this depends on having relatively consistent data formatting (like `PRELIMINARY` alerts for any `superevent id` coming in before `RETRACTION` alerts). We hope to iron this out during the engineering run.
+* Archiving channels after a retraction is very slow right now and will get slower as the number of channels in a workspace increases (due to linear search). Slack does not currently have api's (that I could find) that can do this efficiently i.e. `O(1)` so we might have to build something on our own. Once again, this depends on having relatively consistent data formatting (like `PRELIMINARY` alerts for any `superevent id` coming in before `RETRACTION` alerts). We hope to iron this out during the engineering run.
 
 ## Brendan's To Do:
 
@@ -93,6 +93,4 @@ settings:
 
 ## Acknowledgements:
 
-This bot was created as part of the collaborative efforts of the Gravity collective. 
-
-If you do use this project in your work, please acknowledge the original code developers Ved Shah (vedgs2@illinois.edu), Gautham Narayan (gsn@illinois.edu) and the UIUCSN team. This repo also makes use of some code developed by Charlie Kilpatrick (https://github.com/charliekilpatrick/bot) for parsing LVK alerts. 
+This bot was originally created as part of the collaborative efforts of the Gravity collective. If you do use this project in your work, please acknowledge the original code developers Ved Shah (vedgs2@illinois.edu), Gautham Narayan (gsn@illinois.edu), and the UIUCSN team. This repo also makes use of some code developed by Charlie Kilpatrick (https://github.com/charliekilpatrick/bot) for parsing LVK alerts. 
