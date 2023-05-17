@@ -10,10 +10,10 @@ If you are are looking to set up the alert bot within your own workspace, follow
 
 * Follow instructions to create credentials and install hop-client https://rtd.igwn.org/projects/userguide/en/v17.1/tutorial/receiving/scimma.html 
 And https://github.com/scimma/hop-client/wiki/Tutorial:-using-hop-client-with-the-SCiMMA-Hopskotch-server and https://hop-client.readthedocs.io/en/stable/
-* You can download the hopskotch credentials as a .csv to then pass to hop auth as the username and password are the credentials and not those used to register on the hopskotch website
+* You can download the hopskotch credentials as a .csv to then pass to `hop auth` as the username and password are the credentials and not those used to register on the hopskotch website
 * It seems this information from hopskotch for your credentials is only provided once so download it or save it otherwise you will just need to repeat the process. 
-* To check your authorizations: hop auth locate
-* Then need to run hop subscribe kafka://kafka.scimma.org/igwn.gwalert
+* To check your authorizations: `hop auth locate`
+* Then need to run `hop subscribe kafka://kafka.scimma.org/igwn.gwalert`
 * LVK Alerts content https://emfollow.docs.ligo.org/userguide/content.html
 
 ### 1.2 Configure Slack
