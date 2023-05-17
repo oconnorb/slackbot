@@ -101,7 +101,7 @@ settings:
 * Create a file named `slack_token.py`. Within this file, store the `Bot User OAuth Token` in a variable called `SLACK_TOKEN`. This token will allow you to interface between python and slack.
 * Use the `env.txt` file to recreate the python environment using conda. This can be done using `conda env create --file env.txt`.
 * Activate the newly created conda environment and run `python bot_updated.py` and you should seeing the alerts as they come in. 
-* Note: The original `bot.py` is available through the SCIMMA repo and this fork was edited to add additional capabilities. 
+* Note: The original `bot.py` developed by Ved and Gautham (see acknowledgements) is available through the SCIMMA repo and this fork was edited to add additional capabilities. This file was renamed to `bot_original.py' for record keeping purposes.
 
 ## Known Issues:
 
