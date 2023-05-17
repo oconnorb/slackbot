@@ -113,4 +113,4 @@ settings:
 
 This bot was created as part of the collaborative efforts of the Gravity collective. 
 
-If you do use this project in your work, please acknowledge the original code developers Ved Shah (vedgs2@illinois.edu), Gautham Narayan (gsn@illinois.edu) and the UIUCSN team.
+If you do use this project in your work, please acknowledge the original code developers Ved Shah (vedgs2@illinois.edu), Gautham Narayan (gsn@illinois.edu) and the UIUCSN team. This repo also makes use of code developed by Charlie Kilpatrick (https://github.com/charliekilpatrick/bot).
