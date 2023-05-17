@@ -1,6 +1,6 @@
 # GW-Bot
 
-Slack alert bot for `LIGO 04` gravitational wave alerts via Scimma's Hopskotch. Original codebase developed by Ved Shah, Gautham Narayan, and Charlie Kilpatrick.
+Slack alert bot for `LIGO 04` gravitational wave alerts via Scimma's Hopskotch. 
 
 If you are are looking to set up the alert bot within your own workspace, follow the instructions below.
 
