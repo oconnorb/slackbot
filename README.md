@@ -22,11 +22,11 @@ And https://github.com/scimma/hop-client/wiki/Tutorial:-using-hop-client-with-th
 * Click on `Create New App`.
 * Choose `From an App Manifest`.
 * Choose your workspace. This is where the bot will be installed.
-* Use the app manifest below (both JSON and YAML formats). Please note that these are the permissions that we are currently using. You may want to limit what the bot is capable of doing inside your workspace but that might come at the cost of functionality.
+* Use the app manifest below in YAML format. 
 * Create the app.
 * Navigate to `Features` > `OAuth & Permissions` and scroll down to `OAuth Tokens for Your Workspace`. From here, you can install the app to your workspace. Once you have read through the data permissions, click allow.
-* You will now see a `Bot User OAuth Token`. This is what you can use within python to access the api. 
-* Note: I found that you need pip3 install slack-sdk in order for the `import slack' command to work - pip3 install slackclient is apparently deprecated…
+* You will now see a `Bot User OAuth Token`. This is what you can use within python to access the slack api. 
+* Note: I found that you need `pip3 install slack-sdk` in order for the `import slack' command to work as `pip3 install slackclient` is apparently deprecated…
 
 
 #### App manifests:
@@ -61,7 +61,7 @@ settings:
 
 ### 1.3 Configure Python 
 
-* Create a file named `slack_token.py`. Within this file, store the `Bot User OAuth Token` in a variable called `SLACK_TOKEN`. This token will allow you to interface between python and slack.
+* Create a file named `slack_token.py`. Within this file, store the `Bot User OAuth Token` in a variable called `SLACK_TOKEN`. This token will allow you to interface between python and slack. The file needs only one line which is `SLACK_TOKEN = 'xoxb-xxx-your-token-goes-here'`
 * Use the `env.txt` file to recreate the python environment using conda. This can be done using `conda env create --file env.txt`.
 * Activate the newly created conda environment and run `python bot_updated.py` and you should seeing the alerts as they come in.
 * Note: In order for the alerts to post to slack you need the main channel to already exist and need to have actively added the slackbot app to that channel. 
