@@ -128,6 +128,8 @@ def parse_notice(record):
         dist_std = '%7.2f'%skymap.meta["DISTSTD"]
         dist_mean = dist_mean.strip()
         dist_std = dist_std.strip()
+
+        logbci  = '%7.2f'%skymap.meta["LOGBCI"]
     #
     #    ninety_percent_area = area_within_probability(skymap, 0.90)
     #    fifty_percent_area = area_within_probability(skymap, 0.50)
@@ -183,6 +185,7 @@ def parse_notice(record):
         'external': external,
         #'skymap': skymap, #Commenting out skymap for now as well
         'inst': inst,
+        'logbci': logbci,
     }
 
     return(kwargs)
@@ -219,7 +222,7 @@ if __name__ == '__main__':
                         
                         # Setting some preliminary thresholds so that the channel does not get flooded with bad alerts. Adapt based on needs.
                         # Starting with only significant NS and not mock event as the only threshold.
-                        if instance['event']['classification']['BNS'] > 0.5: #and instance['event']['significant'] == True: # && instance['superevent_id'][0] != 'M':
+                        if instance['event']['classification']['BNS'] > 0.2 and instance['event']['properties']['HasRemnant'] > 0.015 and instance['event']['classification']['terrestrial'] < 0.2 and instance['event']['significant'] == True and instance['superevent_id'][0] != 'M':
 
                             print("NSNS")
                             #print(instance)
@@ -232,11 +235,9 @@ if __name__ == '__main__':
 
                             ########
 
-                            #TODO: Whatever processing you want. Make plots, run analysis, classify event, call other api's etc
-
                             #Auto run gwemopt and download bayestar skymap???
-                            #Needs GPS TIME
-                            print("\n\n TO DO: Auto run gwemopt and create DECam JSON File \n\n")
+                            #Needs GPS TIME - not really as can now just run based on a gracedb name after Robert's code change
+                            print("\n\n TO DO: Auto-run gwemopt and auto-create DECam JSON File \n\n")
 
                             gracedb = f"https://example.org/superevents/{instance['superevent_id']}/view"
                             img_link1 = f"https://gracedb.ligo.org/apiweb/superevents/{instance['superevent_id']}/files/bayestar.png"
@@ -249,7 +250,8 @@ if __name__ == '__main__':
                             if notice is None:
 
                                 # Creating the message text
-                                message_text = f"Superevent ID: *{instance['superevent_id']}*\n \
+                                message_text = f"@Channel \n \
+                                Superevent ID: *{instance['superevent_id']}*\n \
                                 Significant detection? {instance['event']['significant']} \n \
                                 Group: {instance['event']['group']} \n \
                                 BNS % : {instance['event']['classification']['BNS']}\n \
@@ -265,25 +267,10 @@ if __name__ == '__main__':
 
                                 print("Notice passes all checks - sending more details:")
 
-                                if notice['has_ns' ]== 1:
-                                     has_ns = 'THERE IS A NEUTRON STAR!'
-                                else:
-                                    has_ns = 'No Neutron Star? Sad...'
-
-                                if notice['has_remnant' ]== 1:
-                                    has_rem = 'REMNANT LIKELY!'
-                                else:
-                                    has_rem = 'No remnant.'
-
-                                if notice['has_gap'] == 1:
-                                    has_gap = 'THIS IS A MASS GAP EVENT!'
-                                else:
-                                    has_gap = 'Not Mass Gap.'
-
                                 if notice['external'] != None:
                                     ext = 'THERE WAS AN EXTERNAL DETECTION!! RAPID RESPONSE REQUIRED!!'
                                     joint_far = 1/notice['external']['time_sky_position_coincidence_far'] / (3600.0 * 24 * 365.25)
-                                    ext_details = f"Observatory: {notice['external']['observatory']}, time_difference: {notice['external']['time_difference']} seconds, search:  {notice['external']['search']}, joint FAR:  {joint_far} years"
+                                    ext_details = f"Observatory: {notice['external']['observatory']}, time_difference: {notice['external']['time_difference']} seconds, search:  {notice['external']['search']}, joint FAR: 1 per {joint_far} years"
                                 else: 
                                     ext = 'None... :('
                                     ext_details = 'None'
@@ -303,15 +290,16 @@ if __name__ == '__main__':
                                 Event Type: {notice['event_type']}\n \
                                 Alert Type: {notice['alert_type']}\n \
                                 Group: {instance['event']['group']} \n \
-                                FAR (years): {notice['far']}\n \
+                                FAR: 1 per {notice['far']} years \n \
+                                log BCI: {notice['logbci']} \n \
                                 Significant detection? *{instance['event']['significant']}* \n \
                                 Classification Probabilities: {notice['probabilities']}\n \
                                 BNS % : {instance['event']['classification']['BNS']}\n \
                                 NSBH % : {instance['event']['classification']['NSBH']}\n \
                                 Most Likely Classification: {notice['best_class']}\n \
-                                Has_NS: *{has_ns}* \n \
-                                Has_Remnant: {has_rem}\n \
-                                Has_Mass_Gap: {has_gap}\n \
+                                Has_NS: *{notice['has_ns' ]}* \n \
+                                Has_Remnant: *{notice['has_remnant' ]}* \n \
+                                Has_Mass_Gap: {notice['has_gap']}\n \
                                 Distance (Mpc): *{notice['dist_mean']} with error {notice['dist_std']}* \n \
                                 Detection pipeline: {notice['pipe']}\n \
                                 Detection instruments: {notice['inst']}\n \
@@ -331,6 +319,7 @@ if __name__ == '__main__':
 
 
                             # This creates a new slack channel for the alert
+                            name_taken = False
                             try:
                                 print("Trying to create a new channel...", end='')
                                 response = client.conversations_create(name=new_channel_name, token = SLACK_TOKEN)
@@ -339,22 +328,16 @@ if __name__ == '__main__':
                             except SlackApiError as e:
                                 if e.response["error"] == "name_taken":
                                     print("Done")
+                                    name_taken = True
                                 else:
                                     print("\nCould not create new channel. Error: ", e.response["error"])
-
-                            # # This gets the bot to join the channel
-                            # try:
-                            #     print("Trying to join new channel...")
-                            #     response = client.conversations_join(channel = new_channel_name, token = SLACK_TOKEN)
-                            #     print(response)
-                            # except SlackApiError as e:
-                            #     print("Could not join channel. Error: ", e.response)
 
                             # This is a message without buttons and stuff. We are assuming #alert-bot-test already exists and the bot is added to it
                             # If it fails, create #alert-bot-test or similar channel and BE SURE to add the slack bot app to that channel or it cannot send a message to it!
                             try:
                                 print("Trying to send message to general channel...", end='')
-                                response = client.chat_postMessage(channel='#bns-alert', text=message_text)
+                                if name_taken = False:
+                                    response = client.chat_postMessage(channel='#bns-alert', text=message_text)
                                 print("Done")
                             except SlackApiError as e:
                                 print("\nCould not post message. Error: ", e.response["error"])
@@ -394,7 +377,7 @@ if __name__ == '__main__':
                             except SlackApiError as e:
                                 print("\nCould not post message. Error: ", e.response["error"])
 
-                        elif instance['event']['classification']['NSBH'] > 0.5:
+                        elif instance['event']['classification']['NSBH'] > 0.2 and instance['event']['properties']['HasRemnant'] > 0.015 and instance['event']['classification']['terrestrial'] < 0.2 and instance['event']['significant'] == True and instance['superevent_id'][0] != 'M':
 
                             print("NSBH")
                             #print(instance)
@@ -406,8 +389,6 @@ if __name__ == '__main__':
                             #print('\n\n')
 
                             ########
-
-                            #TODO: Whatever processing you want. Make plots, run analysis, classify event, call other api's etc
 
                             #Auto run gwemopt and download bayestar skymap???
                             #Needs GPS TIME
@@ -424,7 +405,8 @@ if __name__ == '__main__':
                             if notice is None:
 
                                 # Creating the message text
-                                message_text = f"Superevent ID: *{instance['superevent_id']}*\n \
+                                message_text = f"@Channel \n \
+                                Superevent ID: *{instance['superevent_id']}*\n \
                                 Significant detection? {instance['event']['significant']} \n \
                                 Group: {instance['event']['group']} \n \
                                 BNS % : {instance['event']['classification']['BNS']}\n \
@@ -439,21 +421,6 @@ if __name__ == '__main__':
                             else:
 
                                 print("Notice passes all checks - sending more details:")
-
-                                if notice['has_ns' ]== 1:
-                                     has_ns = 'THERE IS A NEUTRON STAR!'
-                                else:
-                                    has_ns = 'No Neutron Star? Sad...'
-
-                                if notice['has_remnant' ]== 1:
-                                    has_rem = 'REMNANT LIKELY!'
-                                else:
-                                    has_rem = 'No remnant.'
-
-                                if notice['has_gap'] == 1:
-                                    has_gap = 'THIS IS A MASS GAP EVENT!'
-                                else:
-                                    has_gap = 'Not Mass Gap.'
 
                                 if notice['external'] != None:
                                     ext = 'THERE WAS AN EXTERNAL DETECTION!! RAPID RESPONSE REQUIRED!!'
@@ -478,15 +445,16 @@ if __name__ == '__main__':
                                 Event Type: {notice['event_type']}\n \
                                 Alert Type: {notice['alert_type']}\n \
                                 Group: {instance['event']['group']} \n \
-                                FAR (years): {notice['far']}\n \
+                                FAR: 1 per {notice['far']} years \n \
+                                log BCI: {notice['logbci']} \n \
                                 Significant detection? *{instance['event']['significant']}* \n \
                                 Classification Probabilities: {notice['probabilities']}\n \
                                 BNS % : {instance['event']['classification']['BNS']}\n \
                                 NSBH % : {instance['event']['classification']['NSBH']}\n \
                                 Most Likely Classification: {notice['best_class']}\n \
-                                Has_NS: *{has_ns}* \n \
-                                Has_Remnant: {has_rem}\n \
-                                Has_Mass_Gap: {has_gap}\n \
+                                Has_NS: *{notice['has_ns' ]}* \n \
+                                Has_Remnant: *{notice['has_remnant' ]}* \n \
+                                Has_Mass_Gap: {notice['has_gap']}\n \
                                 Distance (Mpc): *{notice['dist_mean']} with error {notice['dist_std']}* \n \
                                 Detection pipeline: {notice['pipe']}\n \
                                 Detection instruments: {notice['inst']}\n \
@@ -506,6 +474,7 @@ if __name__ == '__main__':
 
 
                             # This creates a new slack channel for the alert
+                            name_taken = False
                             try:
                                 print("Trying to create a new channel...", end='')
                                 response = client.conversations_create(name=new_channel_name, token = SLACK_TOKEN)
@@ -513,6 +482,7 @@ if __name__ == '__main__':
                                 print("Done")
                             except SlackApiError as e:
                                 if e.response["error"] == "name_taken":
+                                    name_taken = True
                                     print("Done")
                                 else:
                                     print("\nCould not create new channel. Error: ", e.response["error"])
@@ -529,7 +499,8 @@ if __name__ == '__main__':
                             # If it fails, create #alert-bot-test or similar channel and BE SURE to add the slack bot app to that channel or it cannot send a message to it!
                             try:
                                 print("Trying to send message to general channel...", end='')
-                                response = client.chat_postMessage(channel='#nsbh-alert', text=message_text)
+                                if name_taken = False:
+                                    response = client.chat_postMessage(channel='#nsbh-alert', text=message_text)
                                 print("Done")
                             except SlackApiError as e:
                                 print("\nCould not post message. Error: ", e.response["error"])
@@ -583,8 +554,6 @@ if __name__ == '__main__':
 
                             ########
 
-                            #TODO: Whatever processing you want. Make plots, run analysis, classify event, call other api's etc
-
                             #Auto run gwemopt and download bayestar skymap???
                             #Needs GPS TIME
                             print("\n\n TO DO: Auto run gwemopt and create DECam JSON File \n\n")
@@ -616,21 +585,6 @@ if __name__ == '__main__':
 
                                 print("Notice passes all checks - sending more details:")
 
-                                if notice['has_ns' ]== 1:
-                                     has_ns = 'THERE IS A NEUTRON STAR!'
-                                else:
-                                    has_ns = 'No Neutron Star? Sad...'
-
-                                if notice['has_remnant' ]== 1:
-                                    has_rem = 'REMNANT LIKELY!'
-                                else:
-                                    has_rem = 'No remnant.'
-
-                                if notice['has_gap'] == 1:
-                                    has_gap = 'THIS IS A MASS GAP EVENT!'
-                                else:
-                                    has_gap = 'Not Mass Gap.'
-
                                 if notice['external'] != None:
                                     ext = 'THERE WAS AN EXTERNAL DETECTION!! RAPID RESPONSE REQUIRED!!'
                                     joint_far = 1/notice['external']['time_sky_position_coincidence_far'] / (3600.0 * 24 * 365.25)
@@ -654,13 +608,14 @@ if __name__ == '__main__':
                                 Event Type: {notice['event_type']}\n \
                                 Alert Type: {notice['alert_type']}\n \
                                 Group: {instance['event']['group']} \n \
-                                FAR (years): {notice['far']}\n \
+                                FAR: 1 per {notice['far']} years \n \
+                                log BCI: {notice['logbci']} \n \
                                 Significant detection? *{instance['event']['significant']}* \n \
                                 Classification Probabilities: {notice['probabilities']}\n \
                                 Most Likely Classification: {notice['best_class']}\n \
-                                Has_NS: *{has_ns}* \n \
-                                Has_Remnant: {has_rem}\n \
-                                Has_Mass_Gap: {has_gap}\n \
+                                Has_NS: *{notice['has_ns' ]}* \n \
+                                Has_Remnant: *{notice['has_remnant' ]}* \n \
+                                Has_Mass_Gap: {notice['has_gap']}\n \
                                 Distance (Mpc): *{notice['dist_mean']} with error {notice['dist_std']}* \n \
                                 Detection pipeline: {notice['pipe']}\n \
                                 Detection instruments: {notice['inst']}\n \
@@ -687,124 +642,7 @@ if __name__ == '__main__':
                                 print("Done")
                             except SlackApiError as e:
                                 print("\nCould not post message. Error: ", e.response["error"])
-
-
-                        elif instance['event']['classification']['terrestrial'] < 0.05 and instance['event']['significant']:
-
-                            print("Alert not terrestrial, but significant, doesn't fit our other criteria.")
-                            notice = parse_notice(message.content[0])
-                            #print(notice)
-                            #print('\n\n')
-                            #print(notice['event_type'])
-                            #print('\n\n')
-
-                            ########
-
-                            #TODO: Whatever processing you want. Make plots, run analysis, classify event, call other api's etc
-
-                            #Auto run gwemopt and download bayestar skymap???
-                            #Needs GPS TIME
-                            print("\n\n TO DO: Auto run gwemopt and create DECam JSON File \n\n")
-
-                            gracedb = f"https://example.org/superevents/{instance['superevent_id']}/view"
-                            img_link1 = f"https://gracedb.ligo.org/apiweb/superevents/{instance['superevent_id']}/files/bayestar.png"
-                            img_link2 = f"https://gracedb.ligo.org/api/superevents/{instance['superevent_id']}/files/bayestar.volume.png"
-                            img_link3 = f"https://gracedb.ligo.org/api/superevents/{instance['superevent_id']}/files/bayestar.fits.gz"
-                            img_link4 = f"http://treasuremap.space/alerts?graceids={instance['superevent_id']}"
-
-                            ########
-
-                            if notice is None:
-
-                                # Creating the message text
-                                message_text = f"Superevent ID: *{instance['superevent_id']}*\n \
-                                Significant detection? {instance['event']['significant']} \n \
-                                Group: {instance['event']['group']} \n \
-                                BNS % : {instance['event']['classification']['BNS']}\n \
-                                NSBH % : {instance['event']['classification']['NSBH']}\n \
-                                Join Related Channel (additional alerts for this event will be sent there): #{instance['superevent_id'].lower()} \n \
-                                Skymap Image: {img_link1} \n \
-                                Bayestar Volume Image: {img_link2} \n \
-                                Bayestar Skymap Download Link (Click to download): {img_link3} \n \
-                                Treasure Map Link: {img_link4} \n \
-                                "
-
-                            else:
-
-                                print("Notice passes all checks - sending more details:")
-
-                                if notice['has_ns' ]== 1:
-                                     has_ns = 'THERE IS A NEUTRON STAR!'
-                                else:
-                                    has_ns = 'No Neutron Star? Sad...'
-
-                                if notice['has_remnant' ]== 1:
-                                    has_rem = 'REMNANT LIKELY!'
-                                else:
-                                    has_rem = 'No remnant.'
-
-                                if notice['has_gap'] == 1:
-                                    has_gap = 'THIS IS A MASS GAP EVENT!'
-                                else:
-                                    has_gap = 'Not Mass Gap.'
-
-                                if notice['external'] != None:
-                                    ext = 'THERE WAS AN EXTERNAL DETECTION!! RAPID RESPONSE REQUIRED!!'
-                                    joint_far = 1/notice['external']['time_sky_position_coincidence_far'] / (3600.0 * 24 * 365.25)
-                                    ext_details = f"Observatory: {notice['external']['observatory']}, time_difference: {notice['external']['time_difference']} seconds, search:  {notice['external']['search']}, joint FAR:  {joint_far} years"
-                                else: 
-                                    ext = 'None... :('
-                                    ext_details = 'None'
-
-                                #print(has_gap)
-                                #print('hi')
-                                #print(notice['ra_dec'])
-                                #print(notice['event_type'])
-                                #print(f"Distance & : {notice['dist_mean']} with error {notice['dist_std']} \n")
-                                #print('hi')
-
-                                # If passes CBC cuts and mock cuts then it creates additional outputs:
-                                # Creating the message text
-                                message_text = f"*Superevent ID: {instance['superevent_id']}* \n \
-                                Event Time {notice['event_time']} \n \
-                                Notice Time {instance['time_created']} \n \
-                                Event Type: {notice['event_type']}\n \
-                                Alert Type: {notice['alert_type']}\n \
-                                Group: {instance['event']['group']} \n \
-                                FAR (years): {notice['far']}\n \
-                                Significant detection? *{instance['event']['significant']}* \n \
-                                Classification Probabilities: {notice['probabilities']}\n \
-                                Most Likely Classification: {notice['best_class']}\n \
-                                Has_NS: *{has_ns}* \n \
-                                Has_Remnant: {has_rem}\n \
-                                Has_Mass_Gap: {has_gap}\n \
-                                Distance (Mpc): *{notice['dist_mean']} with error {notice['dist_std']}* \n \
-                                Detection pipeline: {notice['pipe']}\n \
-                                Detection instruments: {notice['inst']}\n \
-                                Any external detection: {ext}\n \
-                                External Detection Details: {ext_details} \n \
-                                Join Related Channel: #{instance['superevent_id'].lower()} \n \
-                                Skymap Image: {img_link1} \n \
-                                Bayestar Volume Image: {img_link2} \n \
-                                Bayestar Skymap Download Link (Click to download): {img_link3} \n \
-                                Treasure Map Link: {img_link4} \n \
-                                "   
-
-                                #Likely RA (deg): {notice['ra_deg']} \n \
-                                #Likely DEC (deg): {notice['dec_deg']}  \n \
-
-                                print(message_text)
-
-                            # This is a message without buttons and stuff. We are assuming #alert-bot-test already exists and the bot is added to it
-                            # If it fails, create #alert-bot-test or similar channel and BE SURE to add the slack bot app to that channel or it cannot send a message to it!
-                            # For these types of alerts that fail to pass other criteria but still might be interesting we just send to one channel and not create an individual one...
-                            try:
-                                print("Trying to send message to general channel...", end='')
-                                response = client.chat_postMessage(channel='#alert-bot-test', text=message_text)
-                                print("Done")
-                            except SlackApiError as e:
-                                print("\nCould not post message. Error: ", e.response["error"])
-
+                                
                         else: 
 
                             print("Ignoring this event - does not fit any of our criteria.")
