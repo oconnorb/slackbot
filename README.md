@@ -67,7 +67,7 @@ settings:
 * Note: In order for the alerts to post to slack you need the main channel to already exist and need to have actively added the slackbot app to that channel. 
 * Note: The original `bot.py` developed by Ved and Gautham (see acknowledgements) is available through the SCIMMA repo and this fork was edited to add additional capabilities. This file was renamed to `bot_original.py` for record keeping purposes.
 
-## Workflow of the Bot
+## Decision Criteria
 
 *#bns-alert*
 
