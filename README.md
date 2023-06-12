@@ -69,13 +69,27 @@ settings:
 
 ## Workflow of the Bot
 
-*TBD*
+#bns-alert
 
-1. ...
-2. ...
-3. ...
+BNS > 0.2 and HasRemnant > 0.015 and terrestrial < 0.2 and significant == True
 
-*TBD*
+#nsbh-alert
+
+NSBH > 0.2 and HasRemnant > 0.015 and terrestrial < 0.2 and significant == True 
+
+#bbh-alert
+
+BBH > 0.7 and significant == True 
+
+#burst-alert
+
+group != CBC and significant == True
+
+Note that here significant refers to a FAR of 1 per year. Whereas for CBC events it is 1 per month.
+
+#low-sig-alert
+
+area90 < 250 deg^2 and significant != True and terrestrial < 0.4
 
 ## Acknowledgements:
 
