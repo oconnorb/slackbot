@@ -87,7 +87,7 @@ group != CBC and significant == True
 
 Note that here significant refers to a FAR of 1 per year. Whereas for CBC events it is 1 per month.
 
-*#low-sig-alert*
+*#low-sig-alerts*
 
 area90 < 250 deg^2 and significant != True and terrestrial < 0.4
 
