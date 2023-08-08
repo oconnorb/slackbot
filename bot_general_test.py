@@ -5,7 +5,7 @@
 #   with Palmese, my code will be called on all events that are not mock / not terrestrial
 #   I have updated this file to use my slacktalker class, just simplifying the post_message calls
 #
-import gw_handler 
+#import gw_handler 
 from slacktalker import slack_bot
 #
 ############################################################
@@ -849,8 +849,8 @@ if __name__ == '__main__':
                         print("Mock Event, ignoring the retraction.")
            
            # If the event is not a mock and is not terrestrial, we call the gw/frb code
-            if message.content[0]['superevent_id'][0] != 'M' and message.content[0]['event']['classification']['Terrestrial'] < 0.5:
-                gw_handler.main( message, slackbot )  
+            #if message.content[0]['superevent_id'][0] != 'M' and message.content[0]['event']['classification']['Terrestrial'] < 0.5:
+            #    gw_handler.main( message, slackbot )  
             
 
         
